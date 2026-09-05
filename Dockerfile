@@ -2,12 +2,14 @@
 FROM eclipse-temurin:17-jdk-alpine AS builder
 WORKDIR /app
 
-# Copy Maven wrapper and POM first for dependency caching
+# Copy Maven wrapper and configuration
 COPY .mvn/ .mvn/
 COPY mvnw pom.xml lombok.config ./
-RUN ./mvnw dependency:go-offline -B
 
-# Copy source code and package application
+# Ensure mvnw has Unix LF endings and executable permissions
+RUN sed -i 's/\r$//' mvnw && chmod +x mvnw
+
+# Copy source code and build production package
 COPY src/ src/
 RUN ./mvnw clean package -DskipTests
 
