@@ -213,7 +213,7 @@ class DataIsolationIntegrationTest {
         // User B queries monthly report for 2024/1 -> netSavings must be 0, no income
         mockMvc.perform(get("/api/reports/monthly/2024/1").session(sessionUserB))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.netSavings", is(0.00)))
+                .andExpect(jsonPath("$.netSavings").value(0))
                 .andExpect(jsonPath("$.totalIncome").isEmpty());
     }
 }

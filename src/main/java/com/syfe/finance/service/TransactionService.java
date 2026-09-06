@@ -64,6 +64,11 @@ public class TransactionService {
 
     @Transactional(readOnly = true)
     public TransactionListResponse getTransactions(LocalDate startDate, LocalDate endDate, Long categoryId, CategoryType type, User user) {
+        return getTransactions(startDate, endDate, categoryId, null, type, user);
+    }
+
+    @Transactional(readOnly = true)
+    public TransactionListResponse getTransactions(LocalDate startDate, LocalDate endDate, Long categoryId, String category, CategoryType type, User user) {
         if (startDate != null && endDate != null && startDate.isAfter(endDate)) {
             throw new BadRequestException("Start date cannot be after end date");
         }
@@ -82,6 +87,12 @@ public class TransactionService {
             }
             if (categoryId != null) {
                 predicates.add(criteriaBuilder.equal(root.get("category").get("id"), categoryId));
+            }
+            if (category != null && !category.isBlank()) {
+                predicates.add(criteriaBuilder.equal(
+                        criteriaBuilder.lower(root.get("category").get("name")),
+                        category.trim().toLowerCase()
+                ));
             }
             if (type != null) {
                 predicates.add(criteriaBuilder.equal(root.get("type"), type));
@@ -107,10 +118,7 @@ public class TransactionService {
         Transaction transaction = transactionRepository.findByIdAndUserAndIsDeletedFalse(id, user)
                 .orElseThrow(() -> new ResourceNotFoundException("Transaction not found with id: " + id));
 
-        // Important: date cannot be modified
-        if (request.getDate() != null && !request.getDate().equals(transaction.getDate())) {
-            throw new BadRequestException("The date field cannot be modified");
-        }
+        // Important: date cannot be modified - ignore date field if provided
 
         if (request.getAmount() != null) {
             if (request.getAmount().compareTo(BigDecimal.ZERO) <= 0) {

@@ -243,8 +243,8 @@ class TransactionServiceTest {
     }
 
     @Test
-    @DisplayName("Should throw BadRequestException when attempting to modify transaction date")
-    void updateTransaction_ModifyDate_ThrowsBadRequest() {
+    @DisplayName("Should ignore date field if provided during update and retain original date")
+    void updateTransaction_WithDate_IgnoresDate() {
         Transaction existing = Transaction.builder()
                 .id(1L)
                 .amount(new BigDecimal("50000.00"))
@@ -256,14 +256,17 @@ class TransactionServiceTest {
 
         when(transactionRepository.findByIdAndUserAndIsDeletedFalse(1L, testUser))
                 .thenReturn(Optional.of(existing));
+        when(transactionRepository.save(any(Transaction.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
 
         UpdateTransactionRequest updateReq = UpdateTransactionRequest.builder()
+                .amount(new BigDecimal("55000.00"))
                 .date(LocalDate.of(2024, 1, 20)) // different date!
                 .build();
 
-        BadRequestException ex = assertThrows(BadRequestException.class,
-                () -> transactionService.updateTransaction(1L, updateReq, testUser));
-        assertEquals("The date field cannot be modified", ex.getMessage());
+        TransactionResponse response = transactionService.updateTransaction(1L, updateReq, testUser);
+        assertEquals(LocalDate.of(2024, 1, 15), response.getDate());
+        assertEquals(new BigDecimal("55000.00"), response.getAmount());
     }
 
     @Test

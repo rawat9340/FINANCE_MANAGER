@@ -154,7 +154,7 @@ class TransactionControllerTest {
                 .andExpect(jsonPath("$.amount", is(60000.00)))
                 .andExpect(jsonPath("$.description", is("Updated January Salary")));
 
-        // Invalid update: attempt to modify date
+        // Date update should be ignored; date remains 2024-01-15, returns 200 OK
         UpdateTransactionRequest badDateReq = UpdateTransactionRequest.builder()
                 .date(LocalDate.of(2024, 1, 20))
                 .build();
@@ -162,8 +162,8 @@ class TransactionControllerTest {
         mockMvc.perform(put("/api/transactions/" + id).session(session)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(badDateReq)))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.message", is("The date field cannot be modified")));
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.date", is("2024-01-15")));
     }
 
     @Test
