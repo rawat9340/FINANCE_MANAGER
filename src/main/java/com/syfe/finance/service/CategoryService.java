@@ -30,7 +30,8 @@ public class CategoryService {
 
     @Transactional(readOnly = true)
     public CategoryListResponse getCategories(User user) {
-        List<Category> categories = categoryRepository.findAllAccessibleByUser(user);
+        Long userId = user != null ? user.getId() : null;
+        List<Category> categories = categoryRepository.findAllAccessibleByUserId(userId);
         List<CategoryResponse> categoryResponses = categories.stream()
                 .map(this::mapToResponse)
                 .collect(Collectors.toList());
@@ -93,7 +94,8 @@ public class CategoryService {
     }
 
     public Category getAccessibleCategoryByName(String name, User user) {
-        return categoryRepository.findAccessibleByNameIgnoreCase(name.trim(), user)
+        Long userId = user != null ? user.getId() : null;
+        return categoryRepository.findAccessibleByNameIgnoreCaseAndUserId(name.trim(), userId)
                 .orElseThrow(() -> new BadRequestException("Category '" + name + "' does not exist or is not accessible"));
     }
 

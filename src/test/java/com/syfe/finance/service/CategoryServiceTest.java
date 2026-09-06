@@ -63,7 +63,7 @@ class CategoryServiceTest {
         Category food = Category.builder().name("Food").type(CategoryType.EXPENSE).isCustom(false).build();
         Category freelance = Category.builder().name("Freelance").type(CategoryType.INCOME).isCustom(true).user(testUser).build();
 
-        when(categoryRepository.findAllAccessibleByUser(testUser)).thenReturn(List.of(salary, food, freelance));
+        when(categoryRepository.findAllAccessibleByUserId(testUser.getId())).thenReturn(List.of(salary, food, freelance));
 
         CategoryListResponse response = categoryService.getCategories(testUser);
 

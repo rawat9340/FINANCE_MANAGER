@@ -17,6 +17,6 @@ public class HealthController {
     @GetMapping
     @Operation(summary = "Health check", description = "Returns service health status UP")
     public ResponseEntity<Map<String, String>> health() {
-        return ResponseEntity.ok(Map.of("status", "UP"));
+        return ResponseEntity.ok(Map.of("status", "UP", "version", "2026-09-06-v2"));
     }
 }
